@@ -1,10 +1,135 @@
 import { useState } from 'react';
 import './App.css';
+const experiencias = [
+    {
+        id: 1,
+        nombre: 'Desayuno especial',
+        descripcion: 'Un desayuno sorpresa para compartir en un día especial.',
+        precio: 45000,
+        ocasiones: ['Cumpleaños', 'Día de la Madre', 'Día del Padre'],
+        personas: ['Mi mamá', 'Mi papá', 'Un familiar']
+    },
+    {
+        id: 2,
+        nombre: 'Tarde de café',
+        descripcion: 'Una tarde agradable para conversar y disfrutar.',
+        precio: 30000,
+        ocasiones: ['Cumpleaños', 'Quiero sorprender'],
+        personas: ['Mi papá', 'Mi mamá', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 3,
+        nombre: 'Taller de arte',
+        descripcion: 'Una experiencia creativa para pintar y aprender.',
+        precio: 70000,
+        ocasiones: ['Cumpleaños', 'Aniversario', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 4,
+        nombre: 'Día de relajación',
+        descripcion: 'Un espacio para descansar y disfrutar del bienestar.',
+        precio: 90000,
+        ocasiones: ['Cumpleaños', 'Día de la Madre', 'Día del Padre'],
+        personas: ['Mi mamá', 'Mi papá', 'Mi pareja']
+    },
+    {
+        id: 5,
+        nombre: 'Cena especial para dos',
+        descripcion: 'Una cena para compartir momentos inolvidables.',
+        precio: 150000,
+        ocasiones: ['Aniversario', 'San Valentín', 'Cumpleaños'],
+        personas: ['Mi pareja']
+    },
+    {
+        id: 6,
+        nombre: 'Experiencia de aventura',
+        descripcion: 'Un plan diferente para disfrutar y vivir emociones.',
+        precio: 250000,
+        ocasiones: ['Cumpleaños', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 7,
+        nombre: 'Picnic sorpresa',
+        descripcion: 'Un picnic al aire libre para compartir y disfrutar.',
+        precio: 60000,
+        ocasiones: ['Cumpleaños', 'Aniversario', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Un amigo', 'Mi mamá', 'Un familiar']
+    },
+    {
+        id: 8,
+        nombre: 'Spa para dos',
+        descripcion: 'Una experiencia de relajación para disfrutar en compañía.',
+        precio: 180000,
+        ocasiones: ['Aniversario', 'San Valentín', 'Cumpleaños'],
+        personas: ['Mi pareja', 'Mi mamá', 'Un amigo']
+    },
+    {
+        id: 9,
+        nombre: 'Clase de baile',
+        descripcion: 'Aprende nuevos pasos y disfruta de la música.',
+        precio: 80000,
+        ocasiones: ['Cumpleaños', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 10,
+        nombre: 'Caja de dulces personalizada',
+        descripcion: 'Una selección de dulces para sorprender a alguien especial.',
+        precio: 40000,
+        ocasiones: ['Cumpleaños', 'San Valentín', 'Día de la Madre', 'Día del Padre'],
+        personas: ['Mi pareja', 'Mi mamá', 'Mi papá', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 11,
+        nombre: 'Escapada de fin de semana',
+        descripcion: 'Un viaje para desconectarse y descubrir nuevos lugares.',
+        precio: 350000,
+        ocasiones: ['Aniversario', 'San Valentín', 'Cumpleaños'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 12,
+        nombre: 'Taller de cocina',
+        descripcion: 'Una actividad para aprender recetas y compartir sabores.',
+        precio: 120000,
+        ocasiones: ['Cumpleaños', 'Día de la Madre', 'Día del Padre', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Mi mamá', 'Mi papá', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 13,
+        nombre: 'Sesión de fotografía',
+        descripcion: 'Conserva recuerdos especiales con una sesión fotográfica.',
+        precio: 220000,
+        ocasiones: ['Cumpleaños', 'Aniversario', 'San Valentín'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    },
+    {
+        id: 14,
+        nombre: 'Experiencia de spa premium',
+        descripcion: 'Un día completo de bienestar, descanso y cuidado personal.',
+        precio: 280000,
+        ocasiones: ['Cumpleaños', 'Día de la Madre', 'Aniversario'],
+        personas: ['Mi mamá', 'Mi pareja', 'Un familiar']
+    },
+    {
+        id: 15,
+        nombre: 'Día de deportes extremos',
+        descripcion: 'Una aventura llena de adrenalina y nuevas emociones.',
+        precio: 320000,
+        ocasiones: ['Cumpleaños', 'Quiero sorprender'],
+        personas: ['Mi pareja', 'Un amigo', 'Un familiar']
+    }
+];
+
 
 function App() {
   const [ocasion, setOcasion] = useState('');
   const [persona, setPersona] = useState('');
   const [presupuesto, setPresupuesto] = useState('');
+  const [resultados, setResultados] = useState([]);
+  const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
@@ -14,14 +139,40 @@ function App() {
     e.preventDefault();
 
     if (!ocasion || !persona || !presupuesto) {
-      alert('Por favor, completa todos los campos del buscador.');
-      return;
+        alert('Por favor, completa todos los campos del buscador.');
+        return;
     }
 
-    alert(
-      `Buscando una experiencia para: ${persona}\nOcasión: ${ocasion}\nPresupuesto: ${presupuesto}`
-    );
-  };
+    let precioMinimo = 0;
+    let precioMaximo = 0;
+
+    if (presupuesto === 'Hasta $50.000') {
+        precioMaximo = 50000;
+    } else if (presupuesto === '$50.000 - $100.000') {
+        precioMinimo = 50000;
+        precioMaximo = 100000;
+    } else if (presupuesto === '$100.000 - $200.000') {
+        precioMinimo = 100000;
+        precioMaximo = 200000;
+    } else if (presupuesto === 'Más de $200.000') {
+        precioMinimo = 200000;
+        precioMaximo = Infinity;
+    }
+
+    const experienciasFiltradas = experiencias.filter((experiencia) => {
+        const coincideOcasion = experiencia.ocasiones.includes(ocasion);
+        const coincidePersona = experiencia.personas.includes(persona);
+
+        const coincidePresupuesto =
+            experiencia.precio >= precioMinimo &&
+            experiencia.precio <= precioMaximo;
+
+        return coincideOcasion && coincidePersona && coincidePresupuesto;
+    });
+
+    setResultados(experienciasFiltradas);
+    setBusquedaRealizada(true);
+};
 
   const enviarContacto = async (e) => {
     e.preventDefault();
@@ -140,6 +291,37 @@ function App() {
             <button type="submit">Buscar</button>
           </form>
         </section>
+                {busquedaRealizada && (
+          <section className="resultados-busqueda">
+            <div className="titulo-seccion">
+              <span>RECOMENDACIONES</span>
+              <h2>Experiencias para ti</h2>
+              <p>Encontramos estas opciones según tus preferencias.</p>
+            </div>
+
+            {resultados.length > 0 ? (
+              <div className="experiencias-grid">
+                {resultados.map((experiencia) => (
+                  <article className="experiencia-card" key={experiencia.id}>
+                    <div className="experiencia-info">
+                      <h3>{experiencia.nombre}</h3>
+                      <p>{experiencia.descripcion}</p>
+                      <strong>
+                        ${experiencia.precio.toLocaleString('es-CO')}
+                      </strong>
+                      <a href="#contacto">Consultar experiencia →</a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="sin-resultados">
+                No encontramos experiencias para esos criterios.
+                Intenta con otro presupuesto o selección.
+              </p>
+            )}
+          </section>
+        )}
 
         <section id="experiencias" className="categorias">
           <div className="titulo-seccion">
