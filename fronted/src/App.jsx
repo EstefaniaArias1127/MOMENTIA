@@ -2,13 +2,14 @@ import { useState } from 'react';
 import './App.css';
 const experiencias = [
     {
-        id: 1,
-        nombre: 'Desayuno especial',
-        descripcion: 'Un desayuno sorpresa para compartir en un día especial.',
-        precio: 45000,
-        ocasiones: ['Cumpleaños', 'Día de la Madre', 'Día del Padre'],
-        personas: ['Mi mamá', 'Mi papá', 'Un familiar']
-    },
+    id: 1,
+    nombre: 'Desayuno especial',
+    descripcion: 'Un desayuno sorpresa para compartir en un día especial.',
+    precio: 45000,
+    imagen: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0',
+    ocasiones: ['Cumpleaños', 'Día de la Madre', 'Día del Padre'],
+    personas: ['Mi mamá', 'Mi papá', 'Un familiar']
+},
     {
         id: 2,
         nombre: 'Tarde de café',
@@ -303,6 +304,11 @@ function App() {
               <div className="experiencias-grid">
                 {resultados.map((experiencia) => (
                   <article className="experiencia-card" key={experiencia.id}>
+                      <img
+                     src={experiencia.imagen}
+                     alt={experiencia.nombre}
+                    className="experiencia-foto"
+    />
                     <div className="experiencia-info">
                       <h3>{experiencia.nombre}</h3>
                       <p>{experiencia.descripcion}</p>
@@ -322,7 +328,28 @@ function App() {
             )}
           </section>
         )}
+<section id="catalogo" className="destacadas">
+    <div className="titulo-seccion">
+        <span>DESCUBRE MOMENTIA</span>
+        <h2>Todas nuestras experiencias</h2>
+        <p>Explora opciones especiales para regalar y compartir.</p>
+    </div>
 
+    <div className="experiencias-grid">
+        {experiencias.map((experiencia) => (
+            <article className="experiencia-card" key={experiencia.id}>
+                <div className="experiencia-info">
+                    <h3>{experiencia.nombre}</h3>
+                    <p>{experiencia.descripcion}</p>
+                    <strong>
+                        ${experiencia.precio.toLocaleString('es-CO')}
+                    </strong>
+                    <a href="#contacto">Consultar experiencia →</a>
+                </div>
+            </article>
+        ))}
+    </div>
+</section>
         <section id="experiencias" className="categorias">
           <div className="titulo-seccion">
             <span>DESCUBRE</span>
@@ -564,7 +591,7 @@ function App() {
         <div className="footer-enlaces">
           <h3>Explora</h3>
           <a href="#inicio">Inicio</a>
-          <a href="#experiencias">Experiencias</a>
+          <a href="#catalogo">Experiencias</a>
           <a href="#como-funciona">¿Cómo funciona?</a>
         </div>
 
