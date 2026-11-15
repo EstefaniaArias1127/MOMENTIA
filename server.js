@@ -1,10 +1,26 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const Solicitud = require("./models/Solicitud");
 
 const app = express();
 const PORT = 3000;
 
+// Configuración de CORS para permitir la conexión con React
+const corsOptions = {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"]
+};
+// Diagnóstico de solicitudes
+app.use((req, res, next) => {
+    console.log("PETICIÓN RECIBIDA:", req.method, req.url);
+    console.log("ORIGEN:", req.headers.origin);
+    next();
+});
+
+// Configuración de CORS
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Conectar MOMENTIA con MongoDB
@@ -23,7 +39,9 @@ mongoose.connect("mongodb://127.0.0.1:27017/momentia")
 // Ruta principal
 app.get("/", (req, res) => {
     res.send("¡Bienvenido al servidor de MOMENTIA!");
-    // Ruta para recibir solicitudes del formulario de contacto
+});
+
+// Ruta para recibir solicitudes del formulario
 app.post("/api/solicitudes", async (req, res) => {
     try {
         const nuevaSolicitud = new Solicitud({
@@ -45,5 +63,4 @@ app.post("/api/solicitudes", async (req, res) => {
             mensaje: "No se pudo guardar la solicitud"
         });
     }
-});
 });
