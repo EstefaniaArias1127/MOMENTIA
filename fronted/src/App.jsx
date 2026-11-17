@@ -4,6 +4,7 @@ import experiencias from './data/experiencias';
 import { Routes, Route, Link } from 'react-router-dom';
 import Experiencias from './pages/Experiencias';
 import Admin from './pages/Admin';
+import Login from './pages/Login';
 
 function App() {
   const [ocasion, setOcasion] = useState('');
@@ -475,6 +476,8 @@ function App() {
               <Route path="/experiencias" element={<Experiencias />} />
 
         <Route path="/admin" element={<Admin />} />
+
+        <Route path="/login" element={<Login />} />
 
       </Routes>
 

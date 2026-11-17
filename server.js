@@ -1,51 +1,64 @@
+// Cargar variables de entorno
 require("dotenv").config();
 
+// Importar dependencias
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// Importar modelo
 const Solicitud = require("./models/Solicitud");
-const Administrador = require("./models/Administrador");
-const app = express();
-const PORT = 3000;
 
-// Configuración de CORS para permitir la conexión con React
+// Crear aplicación
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// CONFIGURACIÓN CORS
 const corsOptions = {
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 204
 };
 
-// Diagnóstico de solicitudes
+// MIDDLEWARES
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// DIAGNÓSTICO DE SOLICITUDES
 app.use((req, res, next) => {
     console.log("PETICIÓN RECIBIDA:", req.method, req.url);
     console.log("ORIGEN:", req.headers.origin);
     next();
 });
 
-// Funciones que preparan y controlan las solicitudes que llegan al servidor(Configuración de middlewares)
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Ruta principal
+// RUTA PRINCIPAL
 app.get("/", (req, res) => {
     res.send("¡Bienvenido al servidor de MOMENTIA!");
 });
-// Ruta para iniciar sesión como administrador
+
+// INICIO DE SESIÓN DEL ADMINISTRADOR
 app.post("/api/admin/login", async (req, res) => {
     try {
         const { usuario, password } = req.body;
 
-        // Verificar que los datos no estén vacíos
         if (!usuario || !password) {
             return res.status(400).json({
                 mensaje: "Debes ingresar usuario y contraseña"
             });
         }
 
-        // Verificar las credenciales configuradas
+        if (
+            !process.env.ADMIN_USER ||
+            !process.env.ADMIN_PASSWORD ||
+            !process.env.JWT_SECRET
+        ) {
+            return res.status(500).json({
+                mensaje: "La configuración del administrador está incompleta"
+            });
+        }
+
         if (
             usuario !== process.env.ADMIN_USER ||
             password !== process.env.ADMIN_PASSWORD
@@ -55,55 +68,63 @@ app.post("/api/admin/login", async (req, res) => {
             });
         }
 
-        // Generar un token de acceso
         const token = jwt.sign(
-            { usuario },
+            { usuario: usuario },
             process.env.JWT_SECRET,
             { expiresIn: "2h" }
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             mensaje: "Inicio de sesión exitoso",
-            token
+            token: token
         });
 
     } catch (error) {
         console.error("Error en el inicio de sesión:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             mensaje: "Error al iniciar sesión"
         });
     }
 });
 
-// Ruta para recibir solicitudes del formulario
+// RECIBIR SOLICITUDES DEL FORMULARIO
 app.post("/api/solicitudes", async (req, res) => {
     try {
+        const { nombre, correo, mensaje } = req.body;
+
+        if (!nombre || !correo || !mensaje) {
+            return res.status(400).json({
+                mensaje: "Todos los campos son obligatorios"
+            });
+        }
+
         const nuevaSolicitud = new Solicitud({
-            nombre: req.body.nombre,
-            correo: req.body.correo,
-            mensaje: req.body.mensaje
+            nombre: nombre,
+            correo: correo,
+            mensaje: mensaje
         });
 
         await nuevaSolicitud.save();
 
-        res.status(201).json({
+        return res.status(201).json({
             mensaje: "Solicitud guardada correctamente"
         });
 
     } catch (error) {
         console.error("Error al guardar la solicitud:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             mensaje: "No se pudo guardar la solicitud"
         });
     }
 });
-// Verificar que el administrador esté autenticado
+
+// VERIFICAR AUTENTICACIÓN DEL ADMINISTRADOR
 function verificarToken(req, res, next) {
     const autorizacion = req.headers.authorization;
 
-    if (!autorizacion) {
+    if (!autorizacion || !autorizacion.startsWith("Bearer ")) {
         return res.status(401).json({
             mensaje: "Debes iniciar sesión para acceder"
         });
@@ -112,10 +133,12 @@ function verificarToken(req, res, next) {
     const token = autorizacion.split(" ")[1];
 
     try {
-        const verificado = jwt.verify(token, process.env.JWT_SECRET);
+        const verificado = jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
 
         req.administrador = verificado;
-
         next();
 
     } catch (error) {
@@ -124,31 +147,36 @@ function verificarToken(req, res, next) {
         });
     }
 }
-// Ruta para consultar las solicitudes recibidas
-app.get("/api/solicitudes", async (req, res) => {
-    try {
-        const solicitudes = await Solicitud.find().sort({ createdAt: -1 });
 
-        res.status(200).json(solicitudes);
+// CONSULTAR SOLICITUDES RECIBIDAS
+app.get("/api/solicitudes", verificarToken, async (req, res) => {
+    try {
+        const solicitudes = await Solicitud.find().sort({
+            createdAt: -1
+        });
+
+        return res.status(200).json(solicitudes);
 
     } catch (error) {
         console.error("Error al consultar las solicitudes:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             mensaje: "No se pudieron consultar las solicitudes"
         });
     }
 });
 
-// Conectar MOMENTIA con MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/momentia")
-    .then(() => {
-        console.log("MongoDB conectado correctamente");
+// CONECTAR CON MONGODB
+mongoose.connect(
+    process.env.MONGO_URI || "mongodb://127.0.0.1:27017/momentia"
+)
+.then(() => {
+    console.log("MongoDB conectado correctamente");
 
-        app.listen(PORT, () => {
-            console.log(`Servidor corriendo en http://localhost:${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error("Error al conectar con MongoDB:", error);
+    app.listen(PORT, () => {
+        console.log("Servidor corriendo en http://localhost:" + PORT);
     });
+})
+.catch((error) => {
+    console.error("Error al conectar con MongoDB:", error);
+});
