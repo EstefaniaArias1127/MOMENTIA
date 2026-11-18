@@ -1281,6 +1281,175 @@ footer {
     .solicitudes-lista {
         grid-template-columns: 1fr;
     }
+}
 
+/* =========================================
+   CORRECCIÓN DEL CHAT DE MOMENTIA
+========================================= */
 
+.ia-card.ia-chat {
+    width: 420px;
+    max-width: 100%;
+    min-width: 0;
+    padding: 25px;
+    box-sizing: border-box;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Evitar que los estilos antiguos deformen los div */
+.ia-card.ia-chat div {
+    width: auto;
+    height: auto;
+    margin: 0;
+    display: block;
+    border-radius: 0;
+    background: transparent;
+    font-size: inherit;
+}
+
+/* Encabezado */
+.ia-card.ia-chat .ia-chat-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.ia-card.ia-chat .ia-chat-encabezado > span {
+    font-size: 25px;
+}
+
+.ia-card.ia-chat .ia-chat-encabezado h3 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.ia-card.ia-chat .ia-chat-encabezado small {
+    font-size: 12px;
+    color: #777;
+}
+
+/* Área de conversación */
+.ia-card.ia-chat .ia-chat-mensajes {
+    height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.ia-card.ia-chat .ia-mensaje {
+    width: fit-content;
+    max-width: 90%;
+    padding: 12px 15px;
+    border-radius: 14px;
+    background: #f0f1eb;
+    color: #454545;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.ia-card.ia-chat .ia-mensaje p {
+    margin: 0;
+    font-size: 14px;
+    font-style: normal;
+    line-height: 1.5;
+}
+
+.ia-card.ia-chat .ia-mensaje.usuario {
+    align-self: flex-end;
+    background: #59664f;
+    color: white;
+}
+
+.ia-card.ia-chat .ia-mensaje.asistente {
+    align-self: flex-start;
+}
+
+/* Recomendaciones */
+.ia-card.ia-chat .ia-recomendaciones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.ia-card.ia-chat .ia-recomendacion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 10px;
+}
+
+.ia-card.ia-chat .ia-recomendacion img {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.ia-card.ia-chat .ia-recomendacion strong,
+.ia-card.ia-chat .ia-recomendacion span {
+    display: block;
+    font-size: 12px;
+}
+
+/* Formulario */
+.ia-card.ia-chat .ia-chat-formulario {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.ia-card.ia-chat .ia-chat-formulario input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.ia-card.ia-chat .ia-chat-formulario button {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    background: #59664f;
+    color: white;
+    cursor: pointer;
+}
+
+.ia-card.ia-chat .ia-chat-formulario button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Adaptación a celulares */
+@media (max-width: 768px) {
+    .ia {
+        flex-direction: column;
+        padding: 55px 6%;
+        gap: 30px;
+    }
+
+    .ia-contenido {
+        width: 100%;
+    }
+
+    .ia-contenido h2 {
+        font-size: 30px;
+    }
+
+    .ia-card.ia-chat {
+        width: 100%;
+        max-width: 420px;
+    }
 }

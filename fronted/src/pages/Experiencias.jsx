@@ -1,6 +1,6 @@
 import experiencias from '../data/experiencias';
 
-function Experiencias() {
+function Experiencias({ agregarAlCarrito }) {
   return (
     <section className="destacadas">
       <div className="titulo-seccion">
@@ -11,7 +11,11 @@ function Experiencias() {
 
       <div className="experiencias-grid">
         {experiencias.map((experiencia) => (
-          <article className="experiencia-card" key={experiencia.id}>
+          <article
+            className="experiencia-card"
+            key={experiencia.id}
+            id={`experiencia-${experiencia.id}`}
+          >
             <img
               src={experiencia.imagen}
               alt={experiencia.nombre}
@@ -20,14 +24,18 @@ function Experiencias() {
 
             <div className="experiencia-info">
               <h3>{experiencia.nombre}</h3>
+
               <p>{experiencia.descripcion}</p>
 
               <strong>
-                ${experiencia.precio.toLocaleString('es-CO')}
+                ${Number(experiencia.precio).toLocaleString('es-CO')}
               </strong>
 
-              <button type="button">
-                Consultar experiencia →
+              <button
+                type="button"
+                onClick={() => agregarAlCarrito(experiencia)}
+              >
+                Agregar al carrito +
               </button>
             </div>
           </article>

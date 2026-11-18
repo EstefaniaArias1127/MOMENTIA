@@ -1,16 +1,16 @@
-// Cargar variables de entorno
+// CARGAR VARIABLES DE ENTORNO
 require("dotenv").config();
 
-// Importar dependencias
+// IMPORTAR DEPENDENCIAS
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 
-// Importar modelo
+// IMPORTAR MODELO
 const Solicitud = require("./models/Solicitud");
 
-// Crear aplicación
+// CREAR APLICACIÓN
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -80,7 +80,7 @@ app.post("/api/admin/login", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error en el inicio de sesión:", error);
+        console.error("Error en el inicio de sesión:", error.message);
 
         return res.status(500).json({
             mensaje: "Error al iniciar sesión"
@@ -112,7 +112,7 @@ app.post("/api/solicitudes", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error al guardar la solicitud:", error);
+        console.error("Error al guardar la solicitud:", error.message);
 
         return res.status(500).json({
             mensaje: "No se pudo guardar la solicitud"
@@ -158,10 +158,134 @@ app.get("/api/solicitudes", verificarToken, async (req, res) => {
         return res.status(200).json(solicitudes);
 
     } catch (error) {
-        console.error("Error al consultar las solicitudes:", error);
+        console.error("Error al consultar las solicitudes:", error.message);
 
         return res.status(500).json({
             mensaje: "No se pudieron consultar las solicitudes"
+        });
+    }
+});
+
+// ASISTENTE INTELIGENTE DE RECOMENDACIONES DE MOMENTIA
+app.post("/api/ia/chat", (req, res) => {
+    try {
+        const { mensaje, experiencias } = req.body;
+
+        if (!mensaje || typeof mensaje !== "string") {
+            return res.status(400).json({
+                mensaje: "Debes escribir un mensaje válido"
+            });
+        }
+
+        if (!Array.isArray(experiencias)) {
+            return res.status(400).json({
+                mensaje: "No se recibió el catálogo de experiencias"
+            });
+        }
+
+        const normalizar = (texto) =>
+            String(texto || "")
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+
+        const textoUsuario = normalizar(mensaje);
+
+        // Detectar presupuesto
+        let presupuesto = null;
+
+        const presupuestoMil = textoUsuario.match(
+            /(?:hasta|menos de|maximo|presupuesto de)?\s*\$?\s*(\d+(?:[.,]\d+)?)\s*mil/
+        );
+
+        const presupuestoNumero = textoUsuario.match(
+            /(?:hasta|menos de|maximo|presupuesto de)?\s*\$?\s*(\d{4,7}(?:[.,]\d{3})*)/
+        );
+
+        if (presupuestoMil) {
+            presupuesto = Number(
+                presupuestoMil[1].replace(",", ".")
+            ) * 1000;
+        } else if (presupuestoNumero) {
+            presupuesto = Number(
+                presupuestoNumero[1].replace(/[.,]/g, "")
+            );
+        }
+
+        // Palabras clave para encontrar experiencias
+        const palabras = textoUsuario
+            .split(/[^a-z0-9]+/)
+            .filter(palabra => palabra.length > 2);
+
+        const resultados = experiencias
+            .map(experiencia => {
+                const contenido = normalizar([
+                    experiencia.nombre,
+                    experiencia.descripcion,
+                    ...(experiencia.ocasiones || []),
+                    ...(experiencia.personas || [])
+                ].join(" "));
+
+                let puntuacion = 0;
+
+                palabras.forEach(palabra => {
+                    if (contenido.includes(palabra)) {
+                        puntuacion++;
+                    }
+                });
+
+                return {
+                    ...experiencia,
+                    puntuacion
+                };
+            })
+            .filter(experiencia => {
+                const precio = Number(experiencia.precio) || 0;
+
+                return presupuesto === null || precio <= presupuesto;
+            })
+            .sort((a, b) => {
+                if (b.puntuacion !== a.puntuacion) {
+                    return b.puntuacion - a.puntuacion;
+                }
+
+                return a.precio - b.precio;
+            });
+
+        if (resultados.length === 0) {
+            return res.status(200).json({
+                respuesta: presupuesto
+                    ? "No encontré experiencias dentro de ese presupuesto. ¿Te gustaría aumentar un poco el valor?"
+                    : "No encontré una experiencia relacionada. Cuéntame qué le gusta a esa persona y te ayudaré a elegir."
+            });
+        }
+
+        const recomendadas = resultados
+            .filter(item => item.puntuacion > 0)
+            .slice(0, 3);
+
+        const seleccionadas = recomendadas.length > 0
+            ? recomendadas
+            : resultados.slice(0, 3);
+
+        const lista = seleccionadas.map(experiencia =>
+            `• ${experiencia.nombre}: $${Number(experiencia.precio).toLocaleString("es-CO")}`
+        ).join("\n");
+
+        const respuesta =
+            `¡Tengo algunas ideas para ti! Estas experiencias podrían ser perfectas:\n\n${lista}\n\n` +
+            "¿Cuál de estas opciones te llama más la atención?";
+
+        return res.status(200).json({
+            respuesta,
+            recomendaciones: seleccionadas
+        });
+
+    } catch (error) {
+        console.error("Error en el asistente de Momentia:", error);
+
+        return res.status(500).json({
+            mensaje: "No pudimos procesar tu solicitud. Inténtalo nuevamente."
         });
     }
 });

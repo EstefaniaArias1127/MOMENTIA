@@ -13,6 +13,11 @@ function App() {
   const [resultados, setResultados] = useState([]);
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
 
+  // ESTADOS DEL ASISTENTE MOMENTIA
+  const [mensajeChat, setMensajeChat] = useState('');
+  const [conversacion, setConversacion] = useState([]);
+  const [cargandoChat, setCargandoChat] = useState(false);
+
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -56,6 +61,7 @@ function App() {
     setBusquedaRealizada(true);
   };
 
+  // FORMULARIO DE CONTACTO
   const enviarContacto = async (e) => {
     e.preventDefault();
 
@@ -81,6 +87,68 @@ function App() {
     } catch (error) {
       console.error('Error:', error);
       alert('No fue posible enviar el mensaje. Verifica que el servidor esté funcionando.');
+    }
+  };
+
+  // ENVIAR MENSAJES AL ASISTENTE MOMENTIA
+  const enviarMensajeChat = async (e) => {
+    e.preventDefault();
+
+    const texto = mensajeChat.trim();
+
+    if (!texto || cargandoChat) {
+      return;
+    }
+
+    setConversacion((anterior) => [
+      ...anterior,
+      { tipo: 'usuario', texto }
+    ]);
+
+    setMensajeChat('');
+    setCargandoChat(true);
+
+    try {
+      const respuesta = await fetch('http://localhost:3000/api/ia/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mensaje: texto,
+          experiencias
+        })
+      });
+
+      const datos = await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(datos.mensaje || 'No se pudo obtener una recomendación.');
+      }
+
+      setConversacion((anterior) => [
+        ...anterior,
+        {
+          tipo: 'asistente',
+          texto: datos.respuesta || 'No recibí una respuesta. Inténtalo nuevamente.',
+          recomendaciones: Array.isArray(datos.recomendaciones)
+            ? datos.recomendaciones
+            : []
+        }
+      ]);
+    } catch (error) {
+      console.error('Error en el asistente de Momentia:', error);
+
+      setConversacion((anterior) => [
+        ...anterior,
+        {
+          tipo: 'asistente',
+          texto: 'No pude conectarme con el servidor. Verifica que Momentia esté funcionando e inténtalo nuevamente.',
+          recomendaciones: []
+        }
+      ]);
+    } finally {
+      setCargandoChat(false);
     }
   };
 
@@ -216,8 +284,6 @@ function App() {
                 </section>
               )}
 
-            
-
               <section id="experiencias" className="categorias">
                 <div className="titulo-seccion">
                   <span>DESCUBRE</span>
@@ -316,34 +382,104 @@ function App() {
                 </div>
               </section>
 
+              {/* ASISTENTE DE RECOMENDACIONES MOMENTIA */}
               <section id="recomendaciones" className="ia">
                 <div className="ia-contenido">
                   <span>✦ TU ASISTENTE PERSONAL</span>
                   <h2>¿No sabes qué regalar?</h2>
                   <p>
-                    Cuéntanos un poco sobre esa persona y te ayudaremos a encontrar
-                    una experiencia que realmente le guste.
+                    Cuéntame para quién buscas un regalo, qué le gusta y cuánto
+                    quieres invertir. Te ayudaré a encontrar una experiencia.
                   </p>
 
                   <ul>
-                    <li>✓ Según sus intereses</li>
-                    <li>✓ Según tu presupuesto</li>
-                    <li>✓ Según la ocasión</li>
-                    <li>✓ Según su edad</li>
+                    <li>✓ Recomendaciones según sus intereses</li>
+                    <li>✓ Opciones según tu presupuesto</li>
+                    <li>✓ Ideas para diferentes ocasiones</li>
                   </ul>
 
-                  <a href="#contacto" className="boton-principal">
-                    Encontrar el regalo ideal
-                  </a>
+                  <p>
+                    Nuestro recomendador analiza el catálogo de Momentia para
+                    sugerirte opciones relacionadas con lo que necesitas.
+                  </p>
                 </div>
 
-                <div className="ia-card">
-                  <div>✨</div>
-                  <h3>Momentia AI</h3>
-                  <p>
-                    "Cuéntame para quién estás buscando un regalo y te ayudaré a
-                    encontrar el momento perfecto."
-                  </p>
+                <div className="ia-card ia-chat">
+                  <div className="ia-chat-encabezado">
+                    <span>✨</span>
+                    <div>
+                      <h3>Momentia AI</h3>
+                      <small>Asistente de recomendaciones</small>
+                    </div>
+                  </div>
+
+                  <div className="ia-chat-mensajes" aria-live="polite">
+                    {conversacion.length === 0 && (
+                      <div className="ia-mensaje asistente">
+                        ¡Hola! Soy el asistente de Momentia. Cuéntame para quién
+                        buscas un regalo, qué le gusta o cuál es tu presupuesto.
+                      </div>
+                    )}
+
+                    {conversacion.map((item, indice) => (
+                      <div
+                        key={`${indice}-${item.tipo}`}
+                        className={`ia-mensaje ${item.tipo}`}
+                      >
+                        <p>{item.texto}</p>
+
+                        {item.recomendaciones?.length > 0 && (
+                          <div className="ia-recomendaciones">
+                            {item.recomendaciones.map((experiencia) => (
+                              <Link
+                                to={`/experiencias#experiencia-${experiencia.id}`}
+                                className="ia-recomendacion"
+                                key={experiencia.id || experiencia.nombre}
+                              >
+                                {experiencia.imagen && (
+                                  <img
+                                    src={experiencia.imagen}
+                                    alt={experiencia.nombre}
+                                  />
+                                )}
+
+                                <div>
+                                  <strong>{experiencia.nombre}</strong>
+                                  <span>
+                                    ${Number(experiencia.precio).toLocaleString('es-CO')}
+                                  </span>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {cargandoChat && (
+                      <div className="ia-mensaje asistente">
+                        Estoy buscando ideas para ti...
+                      </div>
+                    )}
+                  </div>
+
+                  <form className="ia-chat-formulario" onSubmit={enviarMensajeChat}>
+                    <input
+                      type="text"
+                      value={mensajeChat}
+                      onChange={(e) => setMensajeChat(e.target.value)}
+                      placeholder="Ej. Un regalo para mi mamá de $100.000"
+                      aria-label="Escribe tu mensaje para Momentia"
+                      disabled={cargandoChat}
+                    />
+
+                    <button
+                      type="submit"
+                      disabled={cargandoChat || !mensajeChat.trim()}
+                    >
+                      {cargandoChat ? 'Enviando...' : 'Enviar'}
+                    </button>
+                  </form>
                 </div>
               </section>
 
@@ -385,10 +521,12 @@ function App() {
                 <div className="nosotros-texto">
                   <span>NUESTRA HISTORIA</span>
                   <h2>Creemos que los mejores regalos son los momentos que recordamos.</h2>
+
                   <p>
                     Momentia nace de una idea sencilla: muchas veces no sabemos qué
                     regalar, pero sabemos que queremos hacer sentir especial a alguien.
                   </p>
+
                   <p>
                     Por eso creamos un espacio donde encontrar experiencias que
                     conecten a las personas, celebrar ocasiones importantes y crear
@@ -414,6 +552,7 @@ function App() {
 
                 <form id="formContacto" onSubmit={enviarContacto}>
                   <label htmlFor="nombre">Nombre</label>
+
                   <input
                     type="text"
                     id="nombre"
@@ -425,6 +564,7 @@ function App() {
                   />
 
                   <label htmlFor="correo">Correo electrónico</label>
+
                   <input
                     type="email"
                     id="correo"
@@ -436,6 +576,7 @@ function App() {
                   />
 
                   <label htmlFor="mensaje">¿En qué podemos ayudarte?</label>
+
                   <textarea
                     id="mensaje"
                     name="mensaje"
@@ -452,12 +593,9 @@ function App() {
           }
         />
 
-              <Route path="/experiencias" element={<Experiencias />} />
-
+        <Route path="/experiencias" element={<Experiencias />} />
         <Route path="/admin" element={<Admin />} />
-
         <Route path="/login" element={<Login />} />
-
       </Routes>
 
       <footer>
@@ -492,6 +630,5 @@ function App() {
     </>
   );
 }
-
 
 export default App;
