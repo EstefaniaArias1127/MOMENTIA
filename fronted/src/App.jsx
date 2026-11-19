@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import experiencias from './data/experiencias';
 import { Routes, Route, Link } from 'react-router-dom';
-import Experiencias from './pages/Experiencias';
+import Experiencias from './pages/Experiencias.jsx';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Carrito from './pages/Carrito';
