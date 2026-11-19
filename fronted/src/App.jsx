@@ -22,62 +22,63 @@ function App() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [mensaje, setMensaje] = useState('');
-// ESTADOS Y FUNCIONES DEL CARRITO
-const [carrito, setCarrito] = useState(() => {
-  try {
-    return JSON.parse(localStorage.getItem('momentiaCarrito')) || [];
-  } catch {
-    return [];
-  }
-});
 
-const agregarAlCarrito = (experiencia) => {
-  setCarrito((anterior) => {
-    const existe = anterior.find((item) => item.id === experiencia.id);
-
-    const nuevoCarrito = existe
-      ? anterior.map((item) =>
-          item.id === experiencia.id
-            ? { ...item, cantidad: item.cantidad + 1 }
-            : item
-        )
-      : [...anterior, { ...experiencia, cantidad: 1 }];
-
-    localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
-    return nuevoCarrito;
+  // ESTADOS Y FUNCIONES DEL CARRITO
+  const [carrito, setCarrito] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('momentiaCarrito')) || [];
+    } catch {
+      return [];
+    }
   });
 
-  alert('¡Experiencia agregada al carrito!');
-};
+  const agregarAlCarrito = (experiencia) => {
+    setCarrito((anterior) => {
+      const existe = anterior.find((item) => item.id === experiencia.id);
 
-const actualizarCantidad = (id, cantidad) => {
-  setCarrito((anterior) => {
-    const nuevoCarrito = cantidad < 1
-      ? anterior.filter((item) => item.id !== id)
-      : anterior.map((item) =>
-          item.id === id ? { ...item, cantidad } : item
-        );
+      const nuevoCarrito = existe
+        ? anterior.map((item) =>
+            item.id === experiencia.id
+              ? { ...item, cantidad: item.cantidad + 1 }
+              : item
+          )
+        : [...anterior, { ...experiencia, cantidad: 1 }];
 
-    localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
-    return nuevoCarrito;
-  });
-};
+      localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
+      return nuevoCarrito;
+    });
 
-const eliminarDelCarrito = (id) => {
-  actualizarCantidad(id, 0);
-};
+    alert('¡Experiencia agregada al carrito!');
+  };
 
-const vaciarCarrito = () => {
-  localStorage.removeItem('momentiaCarrito');
-  setCarrito([]);
-};
+  const actualizarCantidad = (id, cantidad) => {
+    setCarrito((anterior) => {
+      const nuevoCarrito = cantidad < 1
+        ? anterior.filter((item) => item.id !== id)
+        : anterior.map((item) =>
+            item.id === id ? { ...item, cantidad } : item
+          );
+
+      localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
+      return nuevoCarrito;
+    });
+  };
+
+  const eliminarDelCarrito = (id) => {
+    actualizarCantidad(id, 0);
+  };
+
+  const vaciarCarrito = () => {
+    localStorage.removeItem('momentiaCarrito');
+    setCarrito([]);
+  };
+
   const buscarExperiencia = (e) => {
     e.preventDefault();
 
     if (!ocasion || !persona || !presupuesto) {
       alert('Por favor, completa todos los campos del buscador.');
       return;
-      
     }
 
     let precioMinimo = 0;
@@ -217,8 +218,8 @@ const vaciarCarrito = () => {
           <a href="#nosotros">Nosotros</a>
           <a href="#contacto">Contacto</a>
           <Link to="/carrito">
-         Carrito ({carrito.reduce((total, item) => total + item.cantidad, 0)})
-         </Link>
+            Carrito ({carrito.reduce((total, item) => total + item.cantidad, 0)})
+          </Link>
         </nav>
       </header>
 
@@ -259,8 +260,7 @@ const vaciarCarrito = () => {
                   <span>Hecho para compartir momentos especiales.</span>
                 </div>
               </section>
-
-              <section className="buscador">
+                            <section className="buscador">
                 <h2>¿Qué tipo de momento quieres regalar?</h2>
                 <p>Encuentra una experiencia según lo que estás buscando.</p>
 
@@ -352,42 +352,42 @@ const vaciarCarrito = () => {
                     <div className="categoria-icono">♡</div>
                     <h3>Momentos románticos</h3>
                     <p>Cenas, planes para parejas y experiencias para compartir.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
 
                   <article className="categoria">
                     <div className="categoria-icono">✧</div>
                     <h3>Bienestar & Spa</h3>
                     <p>Regala tranquilidad, relajación y un momento para descansar.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
 
                   <article className="categoria">
                     <div className="categoria-icono">✎</div>
                     <h3>Arte & creatividad</h3>
                     <p>Talleres y actividades para crear y aprender.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
 
                   <article className="categoria">
                     <div className="categoria-icono">◇</div>
                     <h3>Aventura</h3>
                     <p>Emociones, naturaleza y nuevas experiencias.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
 
                   <article className="categoria">
                     <div className="categoria-icono">☼</div>
                     <h3>Escapadas</h3>
                     <p>Una oportunidad para desconectarse y descubrir lugares.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
 
                   <article className="categoria">
                     <div className="categoria-icono">♫</div>
                     <h3>Música & entretenimiento</h3>
                     <p>Planes para disfrutar y vivir algo diferente.</p>
-                    <a href="#destacadas">Explorar →</a>
+                    <Link to="/experiencias">Explorar →</Link>
                   </article>
                 </div>
               </section>
@@ -407,7 +407,7 @@ const vaciarCarrito = () => {
                       <h3>Cena especial para dos</h3>
                       <p>Una noche para disfrutar, conversar y crear recuerdos.</p>
                       <strong>Desde $120.000</strong>
-                      <a href="#contacto">Ver experiencia →</a>
+                      <Link to="/experiencias">Ver experiencia →</Link>
                     </div>
                   </article>
 
@@ -418,7 +418,7 @@ const vaciarCarrito = () => {
                       <h3>Día de relajación</h3>
                       <p>Un espacio pensado para descansar y disfrutar.</p>
                       <strong>Desde $90.000</strong>
-                      <a href="#contacto">Ver experiencia →</a>
+                      <Link to="/experiencias">Ver experiencia →</Link>
                     </div>
                   </article>
 
@@ -429,13 +429,12 @@ const vaciarCarrito = () => {
                       <h3>Taller de arte</h3>
                       <p>Una experiencia diferente para aprender y crear.</p>
                       <strong>Desde $70.000</strong>
-                      <a href="#contacto">Ver experiencia →</a>
+                      <Link to="/experiencias">Ver experiencia →</Link>
                     </div>
                   </article>
                 </div>
               </section>
-
-              {/* ASISTENTE DE RECOMENDACIONES MOMENTIA */}
+                            {/* ASISTENTE DE RECOMENDACIONES MOMENTIA */}
               <section id="recomendaciones" className="ia">
                 <div className="ia-contenido">
                   <span>✦ TU ASISTENTE PERSONAL</span>
@@ -646,26 +645,26 @@ const vaciarCarrito = () => {
           }
         />
 
-       <Route
-  path="/experiencias"
-  element={<Experiencias agregarAlCarrito={agregarAlCarrito} />}
-/>
+        <Route
+          path="/experiencias"
+          element={<Experiencias agregarAlCarrito={agregarAlCarrito} />}
+        />
 
-     <Route
-     path="/carrito"
-     element={
-    <Carrito
-      carrito={carrito}
-      actualizarCantidad={actualizarCantidad}
-      eliminarDelCarrito={eliminarDelCarrito}
-      vaciarCarrito={vaciarCarrito}
-    />
-  }
-/>
-<Route path="/admin" element={<Admin />} />
-<Route path="/login" element={<Login />} />
+        <Route
+          path="/carrito"
+          element={
+            <Carrito
+              carrito={carrito}
+              actualizarCantidad={actualizarCantidad}
+              eliminarDelCarrito={eliminarDelCarrito}
+              vaciarCarrito={vaciarCarrito}
+            />
+          }
+        />
 
-</Routes>
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
 
       <footer>
         <div className="footer-logo">
