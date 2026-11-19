@@ -8,8 +8,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 
 // IMPORTAR MODELO
-const Solicitud = require("./models/Solicitud");
-const Pedido = require("./models/Pedido");
+const Solicitud = require("./models/Solicitud.js");
+const Pedido = require("./models/pedido.js");
 
 // CREAR APLICACIÓN
 const app = express();
