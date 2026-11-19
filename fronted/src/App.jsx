@@ -5,7 +5,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Experiencias from './pages/Experiencias.jsx';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import Carrito from './pages/Carrito';
+import Carrito from './pages/carrito.jsx';
 
 function App() {
   const [ocasion, setOcasion] = useState('');
