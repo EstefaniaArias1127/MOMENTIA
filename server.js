@@ -391,6 +391,8 @@ mongoose.connect(
 )
 .then(() => {
     console.log("MongoDB conectado correctamente");
+    console.log("HOST DE MONGODB:", mongoose.connection.host);
+    console.log("BASE DE DATOS:", mongoose.connection.name);
 
     app.listen(PORT, () => {
         console.log("Servidor corriendo en http://localhost:" + PORT);
