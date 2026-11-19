@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 
 // IMPORTAR MODELO
 const Solicitud = require("./models/Solicitud");
+const Pedido = require("./models/Pedido");
 
 // CREAR APLICACIÓN
 const app = express();
@@ -162,6 +163,100 @@ app.get("/api/solicitudes", verificarToken, async (req, res) => {
 
         return res.status(500).json({
             mensaje: "No se pudieron consultar las solicitudes"
+        });
+    }
+});
+// REGISTRAR PEDIDOS DE MOMENTIA
+app.post("/api/pedidos", async (req, res) => {
+    try {
+        const { cliente, experiencias, total } = req.body;
+
+        if (
+            !cliente ||
+            !cliente.nombre ||
+            !cliente.correo ||
+            !cliente.telefono
+        ) {
+            return res.status(400).json({
+                mensaje: "Debes completar todos los datos del cliente"
+            });
+        }
+
+        if (
+            !Array.isArray(experiencias) ||
+            experiencias.length === 0
+        ) {
+            return res.status(400).json({
+                mensaje: "El carrito está vacío"
+            });
+        }
+
+        // Validar y calcular el total desde los precios recibidos
+        const productos = experiencias.map((item) => {
+            const id = Number(item.id);
+            const precio = Number(item.precio);
+            const cantidad = Number(item.cantidad);
+
+            if (
+                !Number.isInteger(id) ||
+                !Number.isFinite(precio) ||
+                precio < 0 ||
+                !Number.isInteger(cantidad) ||
+                cantidad < 1 ||
+                !item.nombre
+            ) {
+                throw new Error("Hay una experiencia con datos inválidos");
+            }
+
+            return {
+                id,
+                nombre: String(item.nombre),
+                precio,
+                cantidad
+            };
+        });
+
+        const totalCalculado = productos.reduce(
+            (suma, item) => suma + item.precio * item.cantidad,
+            0
+        );
+
+        const nuevoPedido = new Pedido({
+            cliente,
+            experiencias: productos,
+            total: totalCalculado
+        });
+
+        await nuevoPedido.save();
+
+        return res.status(201).json({
+            mensaje: "¡Tu pedido fue registrado correctamente!",
+            pedido: nuevoPedido
+        });
+
+    } catch (error) {
+        console.error("Error al registrar el pedido:", error.message);
+
+        return res.status(400).json({
+            mensaje: error.message || "No se pudo registrar el pedido"
+        });
+    }
+});
+
+// CONSULTAR PEDIDOS (SOLO ADMINISTRADOR)
+app.get("/api/pedidos", verificarToken, async (req, res) => {
+    try {
+        const pedidos = await Pedido.find().sort({
+            createdAt: -1
+        });
+
+        return res.status(200).json(pedidos);
+
+    } catch (error) {
+        console.error("Error al consultar pedidos:", error.message);
+
+        return res.status(500).json({
+            mensaje: "No se pudieron consultar los pedidos"
         });
     }
 });

@@ -5,6 +5,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Experiencias from './pages/Experiencias';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Carrito from './pages/Carrito';
 
 function App() {
   const [ocasion, setOcasion] = useState('');
@@ -21,13 +22,62 @@ function App() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [mensaje, setMensaje] = useState('');
+// ESTADOS Y FUNCIONES DEL CARRITO
+const [carrito, setCarrito] = useState(() => {
+  try {
+    return JSON.parse(localStorage.getItem('momentiaCarrito')) || [];
+  } catch {
+    return [];
+  }
+});
 
+const agregarAlCarrito = (experiencia) => {
+  setCarrito((anterior) => {
+    const existe = anterior.find((item) => item.id === experiencia.id);
+
+    const nuevoCarrito = existe
+      ? anterior.map((item) =>
+          item.id === experiencia.id
+            ? { ...item, cantidad: item.cantidad + 1 }
+            : item
+        )
+      : [...anterior, { ...experiencia, cantidad: 1 }];
+
+    localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
+    return nuevoCarrito;
+  });
+
+  alert('¡Experiencia agregada al carrito!');
+};
+
+const actualizarCantidad = (id, cantidad) => {
+  setCarrito((anterior) => {
+    const nuevoCarrito = cantidad < 1
+      ? anterior.filter((item) => item.id !== id)
+      : anterior.map((item) =>
+          item.id === id ? { ...item, cantidad } : item
+        );
+
+    localStorage.setItem('momentiaCarrito', JSON.stringify(nuevoCarrito));
+    return nuevoCarrito;
+  });
+};
+
+const eliminarDelCarrito = (id) => {
+  actualizarCantidad(id, 0);
+};
+
+const vaciarCarrito = () => {
+  localStorage.removeItem('momentiaCarrito');
+  setCarrito([]);
+};
   const buscarExperiencia = (e) => {
     e.preventDefault();
 
     if (!ocasion || !persona || !presupuesto) {
       alert('Por favor, completa todos los campos del buscador.');
       return;
+      
     }
 
     let precioMinimo = 0;
@@ -166,6 +216,9 @@ function App() {
           <a href="#como-funciona">¿Cómo funciona?</a>
           <a href="#nosotros">Nosotros</a>
           <a href="#contacto">Contacto</a>
+          <Link to="/carrito">
+         Carrito ({carrito.reduce((total, item) => total + item.cantidad, 0)})
+         </Link>
         </nav>
       </header>
 
@@ -593,10 +646,26 @@ function App() {
           }
         />
 
-        <Route path="/experiencias" element={<Experiencias />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
+       <Route
+  path="/experiencias"
+  element={<Experiencias agregarAlCarrito={agregarAlCarrito} />}
+/>
+
+     <Route
+     path="/carrito"
+     element={
+    <Carrito
+      carrito={carrito}
+      actualizarCantidad={actualizarCantidad}
+      eliminarDelCarrito={eliminarDelCarrito}
+      vaciarCarrito={vaciarCarrito}
+    />
+  }
+/>
+<Route path="/admin" element={<Admin />} />
+<Route path="/login" element={<Login />} />
+
+</Routes>
 
       <footer>
         <div className="footer-logo">
