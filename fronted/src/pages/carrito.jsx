@@ -22,7 +22,7 @@ function Carrito({ carrito, actualizarCantidad, eliminarDelCarrito, vaciarCarrit
     setEnviando(true);
 
     try {
-      const respuesta = await fetch('https://momentia-backend-rqze.onrender.com/api/pedidos', {
+      const respuesta = await fetch('https://momentia-backend-rq2e.onrender.com/api/pedidos', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

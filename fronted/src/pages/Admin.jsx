@@ -25,7 +25,7 @@ function Admin() {
 
       try {
         const solicitudesRespuesta = await fetch(
-          'https://momentia-backend-rqze.onrender.com/api/solicitudes',
+          'https://momentia-backend-rq2e.onrender.com/api/solicitudes',
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -34,7 +34,7 @@ function Admin() {
         );
 
         const pedidosRespuesta = await fetch(
-          'https://momentia-backend-rqze.onrender.com/api/pedidos',
+          'https://momentia-backend-rq2e.onrender.com/api/pedidos',
           {
             headers: {
               Authorization: `Bearer ${token}`
