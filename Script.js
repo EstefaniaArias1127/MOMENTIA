@@ -50,7 +50,7 @@ formContacto.addEventListener("submit", async function (event) {
 
     try {
 
-        const respuesta = await fetch("http://localhost:3000/api/solicitudes", {
+        const respuesta = await fetch("https://momentia-backend-rqze.onrender.com/api/solicitudes", {
             method: "POST",
 
             headers: {

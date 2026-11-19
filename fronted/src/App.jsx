@@ -116,7 +116,7 @@ const vaciarCarrito = () => {
     e.preventDefault();
 
     try {
-      const respuesta = await fetch('http://localhost:3000/api/solicitudes', {
+      const respuesta = await fetch('https://momentia-backend-rqze.onrender.com/api/solicitudes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ const vaciarCarrito = () => {
     setCargandoChat(true);
 
     try {
-      const respuesta = await fetch('http://localhost:3000/api/ia/chat', {
+      const respuesta = await fetch('https://momentia-backend-rqze.onrender.com/api/ia/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
